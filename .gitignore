@@ -1,6 +1,7 @@
 data/*
 !data/.gitkeep
 !data/README_data.md
+!data/processed
 *.csv
 *.xlsx
 __pycache__/
