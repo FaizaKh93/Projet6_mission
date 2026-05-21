@@ -2,14 +2,14 @@ import gc
 import numpy as np
 import pandas as pd
 
-from src.data_loading import load_csv 
+from src.data_loading import load_csv  
 
 #=================================================================
 # One-hot encoding for categorical columns with get_dummies
 #=================================================================
 def one_hot_encoder(df, nan_as_category=True):
     """
-    Applique un encodage one-hot sur les variables catégorielles d'un DataFrame.
+    Applique un encodage one-hot sur les variables catégorielles d'un DataFrame. 
 
     Cette fonction transforme toutes les colonnes de type 'object' en variables
     binaires (0/1) via la méthode pandas.get_dummies().
@@ -33,7 +33,7 @@ def one_hot_encoder(df, nan_as_category=True):
 
     # Identification des nouvelles colonnes créées
     new_columns = [c for c in df.columns if c not in original_columns]
-    return df, new_columns
+    return df, new_columns, categorical_columns
 
 #=================================================================
 # Preprocess application_train.csv and application_test.csv
@@ -65,10 +65,13 @@ def application_train_test(num_rows=None, nan_as_category=False):
         df[bin_feature], _ = pd.factorize(df[bin_feature])
 
     # Encodage des variables catégorielles restantes (one-hot)
-    df, cat_cols = one_hot_encoder(df, nan_as_category)
+    df, cat_cols, original_cat_cols = one_hot_encoder(df, nan_as_category)
 
-    # Correction d'une valeur aberrante connue (365243 = valeur manquante déguisée)
-    df["DAYS_EMPLOYED"] = df["DAYS_EMPLOYED"].replace(365243, np.nan)
+    # créer un flag pour signaler l'anomalie (365243 = valeur manquante déguisée)
+    df['DAYS_EMPLOYED_ANOM'] = (df["DAYS_EMPLOYED"] == 365243).astype(int)
+
+    # Correction des anomalies avec une valeur aberrante connue 
+    df["DAYS_EMPLOYED"] = df["DAYS_EMPLOYED"].replace(365243, np.nan) 
 
     #------------------------------
     # Feature engineering
@@ -123,8 +126,8 @@ def bureau_and_balance(num_rows = None, nan_as_category = True):
     bb = load_csv('bureau_balance.csv', nrows = num_rows)
 
     # Encodage des variables catégorielles
-    bb, bb_cat = one_hot_encoder(bb, nan_as_category)
-    bureau, bureau_cat = one_hot_encoder(bureau, nan_as_category)
+    bb, bb_cat, original_bb_cat = one_hot_encoder(bb, nan_as_category)
+    bureau, bureau_cat, original_bureau_cat = one_hot_encoder(bureau, nan_as_category)
 
     #------------------------------
     # Agrégation bureau_balance (niveau crédit). Bureau balance: Perform aggregations and merge with bureau.csv
@@ -230,7 +233,7 @@ def previous_applications(num_rows = None, nan_as_category = True):
     prev = load_csv('previous_application.csv', nrows = num_rows)
 
     # Encodage des variables catégorielles
-    prev, cat_cols = one_hot_encoder(prev, nan_as_category= True)
+    prev, cat_cols, original_cat_cols = one_hot_encoder(prev, nan_as_category= True)
     # Days 365.243 values -> nan
 
     # Remplacement des valeurs aberrantes 365243 par NaN
@@ -318,7 +321,7 @@ def pos_cash(num_rows = None, nan_as_category = True):
     pos = load_csv('POS_CASH_balance.csv', nrows = num_rows)
 
     # Encodage des variables catégorielles
-    pos, cat_cols = one_hot_encoder(pos, nan_as_category= True)
+    pos, cat_cols, original_cat_cols = one_hot_encoder(pos, nan_as_category= True)
 
     # Définition des agrégations numériques principales
     aggregations = {
@@ -368,7 +371,7 @@ def installments_payments(num_rows = None, nan_as_category = True):
     ins = load_csv('installments_payments.csv', nrows = num_rows)
 
     # Encodage des variables catégorielles
-    ins, cat_cols = one_hot_encoder(ins, nan_as_category= True)
+    ins, cat_cols, original_cat_cols = one_hot_encoder(ins, nan_as_category= True)
 
     #------------------------------
     # feature engineering
@@ -456,7 +459,7 @@ def credit_card_balance(num_rows = None, nan_as_category = True):
     cc = load_csv('credit_card_balance.csv', nrows = num_rows)
     
     # Encodage des variables catégorielles
-    cc, cat_cols = one_hot_encoder(cc, nan_as_category= True)
+    cc, cat_cols, original_cat_cols = one_hot_encoder(cc, nan_as_category= True)
 
     # Suppression de l'identifiant de crédit (on agrège au niveau client)
     cc.drop(['SK_ID_PREV'], axis= 1, inplace = True)
