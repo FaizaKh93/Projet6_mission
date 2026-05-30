@@ -1,3 +1,10 @@
+"""
+build_dataset.py — Construction du dataset final multi-tables.
+
+Assemble les donnees de six sources (application, bureau, previous_application,
+POS/Cash, installments, credit_card_balance) en un seul DataFrame par client.
+Appeler build_dataset() pour obtenir le dataset pret pour la modelisation.
+"""
 import gc
 
 from src.feature_engineering import (
