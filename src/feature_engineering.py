@@ -1,24 +1,32 @@
+"""
+feature_engineering.py — Pipeline de feature engineering.
+
+Nettoie, encode et agregee chaque table source du dataset Home Credit :
+application, bureau, previous_application, POS/Cash, installments, credit_card_balance.
+Chaque fonction retourne un DataFrame indexe par SK_ID_CURR, pret a etre joint
+au dataset principal via build_dataset.build_dataset().
+"""
 import gc
 import numpy as np
 import pandas as pd
 
-from src.data_loading import load_csv  
+from src.data_loading import load_csv
 
-#=================================================================
-# One-hot encoding for categorical columns with get_dummies
-#=================================================================
+
+# ── Encodage one-hot ───────────────────────────────────────────────────────────
 def one_hot_encoder(df, nan_as_category=True):
     """
-    Applique un encodage one-hot sur les variables catégorielles d'un DataFrame. 
+    Applique un encodage one-hot sur toutes les colonnes 'object' du DataFrame.
 
-    Cette fonction transforme toutes les colonnes de type 'object' en variables
-    binaires (0/1) via la méthode pandas.get_dummies().
-    -----
-    Notes
-    -----
-    - Seules les colonnes de type 'object' sont encodées.
-    - Les colonnes originales sont supprimées et remplacées par les nouvelles colonnes binaires.
-   """
+    Retour
+    ------
+    df : pd.DataFrame
+        DataFrame avec les colonnes categorielless remplacees par des colonnes binaires.
+    new_columns : list[str]
+        Noms des colonnes creees par le one-hot encoding.
+    categorical_columns : list[str]
+        Noms des colonnes originales encodees.
+    """
     # Sauvegarde des colonnes initiales
     original_columns = list(df.columns)
 

@@ -1,3 +1,9 @@
+"""
+data_loading.py — Chargement des fichiers CSV bruts.
+
+Resout le chemin vers data/ a partir de la position de ce fichier,
+independamment de la machine ou du repertoire de travail courant.
+"""
 from pathlib import Path
 import pandas as pd
 #from src.config import DATA_DIR
